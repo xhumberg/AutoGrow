@@ -1,4 +1,5 @@
 #include <DS3231.h>
+
 #include "pinDefinitions.h"
 
 
@@ -17,7 +18,15 @@
 #define LASER_SENSOR P3_0
 #define GROW_LIGHT P3_6
 
-
+//For watering system
+#define SENSOR1 P6_1
+#define SENSOR2 P4_0
+#define SENSOR3 P4_2
+#define SOLENOID0 P4_4
+#define SOLENOID1 P4_5
+#define SOLENOID2 P4_7
+#define PUMP_EN P5_4
+#define PUMP_A P5_5
 
 //ease of use definitions
 #define LEFT 0
@@ -32,6 +41,7 @@
 //Setup rtc
 DS3231 rtc(SDA, SCL);
 Time t, prevt;
+
 void setup() {
   initializePins();
   rtc_setup();
@@ -43,6 +53,7 @@ void setup() {
 void loop() {
   //delay(3600000);
   rtc_get();
+  delay(1000);
 
 }
 
@@ -61,6 +72,18 @@ void initializePins() {
   pinMode(LASER_SENSOR, INPUT);
   pinMode(GROW_LIGHT, OUTPUT);
   pinMode(LASER, OUTPUT);
+  pinMode(SENSOR1, INPUT);
+  pinMode(SENSOR2, INPUT);
+  pinMode(SENSOR3, INPUT);
+  pinMode(SOLENOID0, OUTPUT);
+  pinMode(SOLENOID0, OUTPUT);
+  pinMode(SOLENOID0, OUTPUT);
+  pinMode(SOLENOID1, OUTPUT);
+  pinMode(SOLENOID2, OUTPUT);
+  pinMode(PUMP_EN, OUTPUT);
+  pinMode(PUMP_A, OUTPUT);
+
+  
  // pinMode(BLUE_LED, OUTPUT);
 }
 
@@ -238,13 +261,109 @@ void rtc_get() {
 
   //Time to turn on light
   if(t.hour == 8 && !digitalRead(GROW_LIGHT))
+  {
     digitalWrite(GROW_LIGHT, HIGH);
+    moistureRead();
+  }
     
   //Turn off light
   if(t.hour == 16 && digitalRead(GROW_LIGHT))
+  {
     digitalWrite(GROW_LIGHT, LOW);
-    
+    moistureRead();
+  } 
   
 
 }
 
+/*
+ * Reads in the moisture level of each plant and waters if needed
+ */
+void moistureRead() {
+
+  //Holds value read from soil sensors
+  int sens1, sens2, sens3;
+
+  sens1 = analogRead(SENSOR1);
+  sens2 = analogRead(SENSOR2);
+  sens3 = analogRead(SENSOR3);
+
+  //Waters each plant if the read in moisture value was deemed dry
+  if(sens1 > 430)
+    water1();
+
+  if(sens2 > 430)
+    water2();
+
+  if(sens3 > 430)
+    water3();
+}
+
+/*
+ * Handles watering for plant 1
+ */
+void water1() {
+  //Turn on watering for specific plant
+  digitalWrite(SOLENOID0, LOW);
+  digitalWrite(SOLENOID1, LOW);
+  digitalWrite(SOLENOID2, LOW);
+  digitalWrite(PUMP_EN, HIGH);
+  delay(1000);
+  digitalWrite(PUMP_A, HIGH);
+  delay(10000);
+
+  //Turn off watering for specific plant
+  digitalWrite(PUMP_A, LOW);
+  delay(1000);
+  digitalWrite(SOLENOID0, LOW);
+  digitalWrite(SOLENOID1, LOW);
+  digitalWrite(SOLENOID2, LOW);
+  digitalWrite(PUMP_EN, LOW);
+  
+}
+
+/*
+ * Handles watering for plant 2
+ */
+void water2() {
+  //Turn on watering for specific plant
+  digitalWrite(SOLENOID0, LOW);
+  digitalWrite(SOLENOID1, LOW);
+  digitalWrite(SOLENOID2, HIGH);
+  digitalWrite(PUMP_EN, HIGH);
+  delay(1000);
+  digitalWrite(PUMP_A, HIGH);
+  delay(10000);
+
+  //Turn off watering for specific plant
+  digitalWrite(PUMP_A, LOW);
+  delay(1000);
+  digitalWrite(SOLENOID0, LOW);
+  digitalWrite(SOLENOID1, LOW);
+  digitalWrite(SOLENOID2, LOW);
+  digitalWrite(PUMP_EN, LOW);
+  
+}
+
+/*
+ * Handles watering for plant 3
+ */
+void water3() {
+  //Turn on watering for specific plant
+  digitalWrite(SOLENOID0, LOW);
+  digitalWrite(SOLENOID1, HIGH);
+  digitalWrite(SOLENOID2, LOW);
+  digitalWrite(PUMP_EN, HIGH);
+  delay(1000);
+  digitalWrite(PUMP_A, HIGH);
+  delay(10000);
+
+  //Turn off watering for specific plant
+  digitalWrite(PUMP_A, LOW);
+  delay(1000);
+  digitalWrite(SOLENOID0, LOW);
+  digitalWrite(SOLENOID1, LOW);
+  digitalWrite(SOLENOID2, LOW);
+  digitalWrite(PUMP_EN, LOW);
+  
+}
