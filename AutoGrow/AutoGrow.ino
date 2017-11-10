@@ -1,4 +1,6 @@
+#include <DS3231.h>
 #include "pinDefinitions.h"
+
 
 //Pinout definition
 #define H_ENABLE P5_1
@@ -15,6 +17,8 @@
 #define LASER_SENSOR P3_0
 #define GROW_LIGHT P3_6
 
+
+
 //ease of use definitions
 #define LEFT 0
 #define RIGHT 1
@@ -25,20 +29,21 @@
 #define H_IDLE_OFFSET 100
 #define RESET_DOWN_STEPS 3000
 
-
+//Setup rtc
+DS3231 rtc(SDA, SCL);
+Time t, prevt;
 void setup() {
   initializePins();
-  
+  rtc_setup();
   digitalWrite(H_ENABLE, HIGH);
   initialize();
   digitalWrite(GROW_LIGHT, HIGH);
 }
 
 void loop() {
-  delay(3600000);
-  digitalWrite(GROW_LIGHT, LOW);
-  scan();
-  digitalWrite(GROW_LIGHT, HIGH);  
+  //delay(3600000);
+  rtc_get();
+
 }
 
 
@@ -56,7 +61,7 @@ void initializePins() {
   pinMode(LASER_SENSOR, INPUT);
   pinMode(GROW_LIGHT, OUTPUT);
   pinMode(LASER, OUTPUT);
-  pinMode(BLUE_LED, OUTPUT);
+ // pinMode(BLUE_LED, OUTPUT);
 }
 
 /*
@@ -183,5 +188,63 @@ void toLLimit() {
 
 boolean laserCheck() {
   return digitalRead(LASER_SENSOR);
+}
+
+/*
+ * Setup the clock and intitialize the time if needed.  If time is setup, comment lines out and upload again 
+ */
+void rtc_setup() {
+  rtc.begin();
+
+  //For first time setup of RTC.  Comment after uploading.
+  //rtc.setDOW(FRIDAY);     //Set day of week
+  //rtc.setTime(11, 43, 20);     //Set time in hr, min, sec (24 hour)
+  //rtc.setDate(11, 10, 2017); //Set date in format m/dd/yyyy
+ }
+
+/*
+ * This function keeps the time and switches the light on and off depending on the time as well as 
+ * watering based on time
+ */
+void rtc_get() {
+  //Get the time from the rtc
+  t = rtc.getTime();
+  int newHour = 1;
+
+  //Sets previous hour as base for scanning 
+  if(newHour = 1);
+  {
+    prevt = t;
+    newHour = 0;
+  }
+
+  if(t.hour = prevt.hour + 1)
+  {
+    digitalWrite(GROW_LIGHT, LOW);
+    scan();
+    rtc_get();
+    digitalWrite(GROW_LIGHT, HIGH);
+    newHour = 1;  
+  }
+  
+  //Get day of week, date, and time and print to terminal
+  //Serial.print(rtc.getDOWStr());
+  //Serial.print(" ");
+  //Serial.print(rtc.getDateStr());
+  //Serial.print(" ");
+  //Serial.print(rtc.getTimeStr());
+  //Serial.println();
+  //delay(1000);
+
+  //Time to turn on light
+  if(t.hour == 8 && !digitalRead(GROW_LIGHT))
+    digitalWrite(GROW_LIGHT, HIGH);
+    
+  //Turn off light
+  if(t.hour == 16 && digitalRead(GROW_LIGHT))
+    digitalWrite(GROW_LIGHT, LOW);
+    
+  
+
 }
 
