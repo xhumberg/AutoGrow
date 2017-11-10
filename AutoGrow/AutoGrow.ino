@@ -21,10 +21,28 @@
 #define UP 0
 #define DOWN 1
 
-#define RESET_OFFSET 100
+//Constants (so there aren't any magic numbers)
+#define H_IDLE_OFFSET 100
+#define RESET_DOWN_STEPS 3000
 
 
 void setup() {
+  initializePins();
+  
+  digitalWrite(H_ENABLE, HIGH);
+  initialize();
+  digitalWrite(GROW_LIGHT, HIGH);
+}
+
+void loop() {
+  delay(3600000);
+  digitalWrite(GROW_LIGHT, LOW);
+  scan();
+  digitalWrite(GROW_LIGHT, HIGH);  
+}
+
+
+void initializePins() {
   pinMode(H_ENABLE, OUTPUT);
   pinMode(H_STEP, OUTPUT);
   pinMode(H_DIRECTION, OUTPUT);
@@ -38,28 +56,8 @@ void setup() {
   pinMode(LASER_SENSOR, INPUT);
   pinMode(GROW_LIGHT, OUTPUT);
   pinMode(LASER, OUTPUT);
-
   pinMode(BLUE_LED, OUTPUT);
-  digitalWrite(H_ENABLE, HIGH);
-  initialize();
-  digitalWrite(GROW_LIGHT, HIGH);
 }
-
-
-
-
-
-
-
-
-
-void loop() {
-  delay(3600000);
-  digitalWrite(GROW_LIGHT, LOW);
-  scan();
-  digitalWrite(GROW_LIGHT, HIGH);  
-}
-
 
 /*
  * This function brings the light to the top, and has the laser scan its way downwards until it detects a plant.
@@ -75,8 +73,8 @@ void initialize() {
   int scanLimit = H_LIMIT_RIGHT;
   
   while(true) {
-    //Step down 1500, scanning and returning if we hit the limit
-    if (!vstep(DOWN, 1500)) {
+    //If we can't step all the way down, return;
+    if (!vstep(DOWN, RESET_DOWN_STEPS)) {
       scan();
       return;
     }
@@ -115,12 +113,15 @@ void scan() {
       hstep(scanDirection);
       if (!digitalRead(LASER_SENSOR)) {
         interrupted = true;
-        if (!vstep(UP, 150))
+        if (!vstep(UP, 150)) {
           return;
+          digitalWrite(LASER, LOW);
+        }
       }
     }
     if (!interrupted) {
       resetH();
+      digitalWrite(LASER, LOW);
       return;
     }
     //If we reach this point, we were interrupted, so we should scan the other way
@@ -134,12 +135,6 @@ void scan() {
   }
   digitalWrite(LASER, LOW);
 }
-
-
-
-
-
-
 
 void hstep(int direction) {
     digitalWrite(H_DIRECTION, direction);
@@ -177,53 +172,14 @@ boolean vstep(int direction, int amount) {
 void resetH() {
   toLLimit();
   delay(100);
-  for (int i = 0; i < RESET_OFFSET; i++)
+  for (int i = 0; i < H_IDLE_OFFSET; i++)
     hstep(RIGHT);
 }
-//
-//void resetV() {
-//  digitalWrite(GROW_LIGHT, LOW);
-//  while(digitalRead(V_LIMIT_UP)) {
-//    vstep(UP);
-//  }
-//  delay(100);
-//  while (digitalRead(V_LIMIT_DOWN)) {
-//    if (!scan())
-//      break;
-//    for (int i = 0; i < 3000; i++) {
-//      if (digitalRead(V_LIMIT_DOWN))
-//        vstep(DOWN);
-//      else
-//        break;
-//    }
-//  }
-//  digitalWrite(GROW_LIGHT, HIGH);
-//}
 
 void toLLimit() {
   while (digitalRead(H_LIMIT_LEFT))
     hstep(LEFT);
 }
-
-//boolean scan() {
-//  boolean uninterrupted = true;
-//  digitalWrite(LASER, HIGH);
-//  toLLimit();
-//  delay(500);
-//  while (digitalRead(H_LIMIT_RIGHT) && digitalRead(V_LIMIT_UP)) {
-//    if (digitalRead(LASER_SENSOR))
-//      hstep(RIGHT);
-//    else {
-//      vstep(UP);
-//      uninterrupted = false;
-//    }
-//  }
-//  digitalWrite(LASER, LOW);
-//  resetH();
-//  if (!uninterrupted)
-//    scan();
-//  return uninterrupted;
-//}
 
 boolean laserCheck() {
   return digitalRead(LASER_SENSOR);
