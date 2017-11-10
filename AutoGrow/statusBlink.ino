@@ -1,4 +1,4 @@
-#define LED YELLOW_LED
+#include "pinDefinitions.h"
 
 //Constant definitions
 #define LEFT 0
