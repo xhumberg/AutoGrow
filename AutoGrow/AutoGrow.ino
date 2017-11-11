@@ -16,6 +16,7 @@
 #define LASER P2_5
 #define LASER_SENSOR P3_0
 #define GROW_LIGHT P3_6
+#define READ P6_0
 
 //For watering system
 #define SENSOR1 P6_1
@@ -41,14 +42,21 @@ void setup() {
   initializePins();
   digitalWrite(H_ENABLE, HIGH);
   initialize();
-  digitalWrite(GROW_LIGHT, HIGH);
+  if(digitalRead(READ))
+  {
+    digitalWrite(GROW_LIGHT, HIGH);  
+  }
+  //digitalWrite(GROW_LIGHT, HIGH);
 }
 
 void loop() {
   delay(3600000);
   digitalWrite(GROW_LIGHT, LOW);
   scan();
-  digitalWrite(GROW_LIGHT, HIGH);
+  if(digitalRead(READ))
+  {
+    digitalWrite(GROW_LIGHT, HIGH);
+  }
 
 }
 
@@ -77,7 +85,7 @@ void initializePins() {
   pinMode(SOLENOID2, OUTPUT);
   pinMode(PUMP_EN, OUTPUT);
   pinMode(PUMP_A, OUTPUT);
-
+  pinMode(READ, INPUT);
   
  // pinMode(BLUE_LED, OUTPUT);
 }
@@ -157,6 +165,10 @@ void scan() {
     }
   }
   digitalWrite(LASER, LOW);
+  if(digitalRead(READ))
+  {
+    digitalWrite(GROW_LIGHT, HIGH);
+  }
 }
 
 void hstep(int direction) {

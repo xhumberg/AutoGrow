@@ -1,20 +1,19 @@
 #include "pinDefinitions.h"
-#define READ P6_0
 
-void setup() {
- pinMode(READ, INPUT); 
+
+void setupPhotonRead() {
 }
 
-void loop(){
+void loopPhotonRead(){
   delay(60000);
-  digitalRead(READ); // 1 = light on 0 = light off
-  if(READ)
+   // 1 = light on 0 = light off
+  if(digitalRead(READ))
   {
     digitalWrite(GROW_LIGHT, HIGH);
   }
-  else
+  else if (!digitalRead(READ))
   {
-    digitalWrite(GROW_LIGHT,LOW);
+    digitalWrite(GROW_LIGHT, LOW);
   }
 }
 
