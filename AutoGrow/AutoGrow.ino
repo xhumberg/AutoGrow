@@ -39,6 +39,9 @@
 #define RESET_DOWN_STEPS 3000
 
 void setup() {
+
+  Serial.begin(9600);      // open the serial port at 9600 bps:  
+  
   initializePins();
   digitalWrite(H_ENABLE, HIGH);
   initialize();
@@ -261,94 +264,3 @@ void rtc_get() {
 
 }
 
-/*
- * Reads in the moisture level of each plant and waters if needed
- */
-void moistureRead() {
-
-  //Holds value read from soil sensors
-  int sens1, sens2, sens3;
-
-  sens1 = analogRead(SENSOR1);
-  sens2 = analogRead(SENSOR2);
-  sens3 = analogRead(SENSOR3);
-
-  //Waters each plant if the read in moisture value was deemed dry
-  if(sens1 > 430)
-    water1();
-
-  if(sens2 > 430)
-    water2();
-
-  if(sens3 > 430)
-    water3();
-}
-
-/*
- * Handles watering for plant 1
- */
-void water1() {
-  //Turn on watering for specific plant
-  digitalWrite(SOLENOID0, LOW);
-  digitalWrite(SOLENOID1, LOW);
-  digitalWrite(SOLENOID2, LOW);
-  digitalWrite(PUMP_EN, HIGH);
-  delay(1000);
-  digitalWrite(PUMP_A, HIGH);
-  delay(10000);
-
-  //Turn off watering for specific plant
-  digitalWrite(PUMP_A, LOW);
-  delay(1000);
-  digitalWrite(SOLENOID0, LOW);
-  digitalWrite(SOLENOID1, LOW);
-  digitalWrite(SOLENOID2, LOW);
-  digitalWrite(PUMP_EN, LOW);
-  
-}
-
-/*
- * Handles watering for plant 2
- */
-void water2() {
-  //Turn on watering for specific plant
-  digitalWrite(SOLENOID0, LOW);
-  digitalWrite(SOLENOID1, LOW);
-  digitalWrite(SOLENOID2, HIGH);
-  digitalWrite(PUMP_EN, HIGH);
-  delay(1000);
-  digitalWrite(PUMP_A, HIGH);
-  delay(10000);
-
-  //Turn off watering for specific plant
-  digitalWrite(PUMP_A, LOW);
-  delay(1000);
-  digitalWrite(SOLENOID0, LOW);
-  digitalWrite(SOLENOID1, LOW);
-  digitalWrite(SOLENOID2, LOW);
-  digitalWrite(PUMP_EN, LOW);
-  
-}
-
-/*
- * Handles watering for plant 3
- */
-void water3() {
-  //Turn on watering for specific plant
-  digitalWrite(SOLENOID0, LOW);
-  digitalWrite(SOLENOID1, HIGH);
-  digitalWrite(SOLENOID2, LOW);
-  digitalWrite(PUMP_EN, HIGH);
-  delay(1000);
-  digitalWrite(PUMP_A, HIGH);
-  delay(10000);
-
-  //Turn off watering for specific plant
-  digitalWrite(PUMP_A, LOW);
-  delay(1000);
-  digitalWrite(SOLENOID0, LOW);
-  digitalWrite(SOLENOID1, LOW);
-  digitalWrite(SOLENOID2, LOW);
-  digitalWrite(PUMP_EN, LOW);
-  
-}
