@@ -18,6 +18,7 @@
 #define GROW_LIGHT P3_6
 #define READ P6_0
 
+
 //For watering system
 #define SENSOR1 P6_1
 #define SENSOR2 P4_0
@@ -27,6 +28,7 @@
 #define SOLENOID2 P4_7
 #define PUMP_EN P5_4
 #define PUMP_A P5_5
+#define WATERBUCKET P4_1
 
 //ease of use definitions
 #define LEFT 0
@@ -88,6 +90,7 @@ void initializePins() {
   pinMode(SOLENOID2, OUTPUT);
   pinMode(PUMP_EN, OUTPUT);
   pinMode(PUMP_A, OUTPUT);
+  pinMode(WATERBUCKET, INPUT);
   pinMode(READ, INPUT);
   
  // pinMode(BLUE_LED, OUTPUT);
@@ -181,12 +184,12 @@ void hstep(int direction) {
     delayMicroseconds(500);
     digitalWrite(H_STEP, LOW);
     delayMicroseconds(500);
-    digitalWrite(H_ENABLE, HIGH);
+    digitalWrite(H_ENABLE, LOW);
 }
 
 void vstep(int direction) {
     digitalWrite(V_DIRECTION, direction);
-    digitalWrite(V_ENABLE, LOW);
+    digitalWrite(V_ENABLE, LOW );
     digitalWrite(V_STEP, HIGH);
     delayMicroseconds(500);
     digitalWrite(V_STEP, LOW);

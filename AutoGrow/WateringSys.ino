@@ -5,12 +5,12 @@ void setupWateringSys() {
 
 void loopWateringSys() {
   // put your main code here, to run repeatedly: 
-  
+  Serial.print("\n\n");
   Serial.println("Starting Soil Monitoring System");
   moistureRead();
   Serial.println("Finished Soil Monitoring System");
-   
-  delay(3600000);
+  Serial.print("\n\n"); 
+  delay(7200000);
 
 }
 
@@ -21,10 +21,10 @@ void loopWateringSys() {
 void moistureRead() {
 
   //Holds value read from soil sensors
-  int sens1, sens2, sens3;
+  int sens1, sens2, sens3, bucket;
 
 
-  
+  bucket = digitalRead(WATERBUCKET);
   sens1 = analogRead(SENSOR1);
   sens2 = analogRead(SENSOR2);
   sens3 = analogRead(SENSOR3);
@@ -42,14 +42,22 @@ void moistureRead() {
   Serial.print('\n'); //print the value to serial 
 
 //  Waters each plant if the read in moisture value was deemed dry
-  if(sens1 > 700)
+  if(sens1 > 700 && !bucket)
     water1();
-
-  if(sens2 > 700)
+  if(sens1 > 700 && bucket)
+    Serial.println("Plant 1 needs watered but reservoir is empty ");
+  if(sens2 > 700 && !bucket)
     water2();
+  if(sens2 > 700 && bucket)
+    Serial.println("Plant 2 needs watered but reservoir is empty ");
 
-  if(sens3 > 700)
+  if(sens3 > 700 && !bucket)
     water3();
+  if(sens3 > 700 && bucket)
+     Serial.println("Plant 3 needs watered but reservoir is empty ");
+  if(bucket)
+     Serial.println("WARNING RESERVOIR IS EMPTY, PLEASE FILL WITH WATER");
+
 }
 
 /*
