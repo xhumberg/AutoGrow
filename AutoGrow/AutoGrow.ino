@@ -43,7 +43,7 @@
 void setup() {
 
   Serial.begin(9600);      // open the serial port at 9600 bps:  
-  
+  digitalWrite(PUMP_A, LOW);
   initializePins();
   digitalWrite(H_ENABLE, HIGH);
   initialize();
