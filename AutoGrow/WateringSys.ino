@@ -10,7 +10,7 @@ void loopWateringSys() {
   moistureRead();
   Serial.println("Finished Soil Monitoring System");
   Serial.print("\n\n"); 
-  delay(7200000);
+  delay(1200000);
 
 }
 
