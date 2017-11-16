@@ -5,12 +5,13 @@ void setupWateringSys() {
 
 void loopWateringSys() {
   // put your main code here, to run repeatedly: 
-  Serial.print("\n\n");
-  Serial.println("Starting Soil Monitoring System");
-  moistureRead();
-  Serial.println("Finished Soil Monitoring System");
-  Serial.print("\n\n"); 
-  delay(3600000);
+  
+ // Serial.print("\n\n");
+  //Serial.println("Starting Soil Monitoring System");
+  //moistureRead();
+  //Serial.println("Finished Soil Monitoring System");
+  //Serial.print("\n\n"); 
+  //delay(10000);
 
 }
 
@@ -82,6 +83,7 @@ void water1() {
   digitalWrite(SOLENOID2, LOW);
   digitalWrite(PUMP_EN, LOW);
   Serial.println("Finished Watering Plant 1");
+  Serial1.println("1");
   
 }
 
@@ -107,6 +109,8 @@ void water2() {
   digitalWrite(SOLENOID2, LOW);
   digitalWrite(PUMP_EN, LOW);
   Serial.println("Finished Watering Plant 2");
+  Serial1.println("1");
+
 }
 
 /*
@@ -131,5 +135,6 @@ void water3() {
   digitalWrite(SOLENOID2, LOW);
   digitalWrite(PUMP_EN, LOW);
   Serial.println("Finished Watering Plant 3");
+  Serial1.println("1");
   
 }

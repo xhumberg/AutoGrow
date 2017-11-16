@@ -40,29 +40,60 @@
 #define H_IDLE_OFFSET 100
 #define RESET_DOWN_STEPS 3000
 
+int TIME, HOUR, MIN;
+
+//For UART communcation from Photon
+const size_t READ_BUF_SIZE = 64;
+char readBuf[READ_BUF_SIZE];
+
+//Keep track of hours
+int prevh;
+bool newh = true;
+
+size_t readBufOffset = 0;
+
 void setup() {
 
-  Serial.begin(9600);      // open the serial port at 9600 bps:  
+  Serial.begin(9600);      // open the serial port at 9600 bps:
+  Serial1.begin(9600);
   digitalWrite(PUMP_A, LOW);
   initializePins();
   digitalWrite(H_ENABLE, HIGH);
   initialize();
-  if(digitalRead(READ))
+  if (HOUR >= 8 && HOUR < 20)
   {
-    digitalWrite(GROW_LIGHT, HIGH);  
+    digitalWrite(GROW_LIGHT, HIGH);
   }
   //digitalWrite(GROW_LIGHT, HIGH);
 }
 
 void loop() {
-  delay(3600000);
-  digitalWrite(GROW_LIGHT, LOW);
-  scan();
-  if(digitalRead(READ))
+
+  if (HOUR >= 8 && HOUR < 20)
   {
     digitalWrite(GROW_LIGHT, HIGH);
   }
-
+    
+  int newHOUR = HOUR;
+  if (newh)
+  {
+    prevh = newHOUR;
+    newh = false;
+  }
+  
+  if ( newh == false && newHOUR != prevh)
+  {
+    digitalWrite(GROW_LIGHT, LOW);
+    scan();
+    moistureRead();
+    if (HOUR >= 8 && HOUR < 20)
+    {
+      digitalWrite(GROW_LIGHT, HIGH);
+    }
+    prevh = newHOUR;
+    newh = true;
+  }
+  //Serial.println(prevh);
 }
 
 
@@ -92,24 +123,24 @@ void initializePins() {
   pinMode(PUMP_A, OUTPUT);
   pinMode(WATERBUCKET, INPUT);
   pinMode(READ, INPUT);
-  
- // pinMode(BLUE_LED, OUTPUT);
+
+  // pinMode(BLUE_LED, OUTPUT);
 }
 
 /*
- * This function brings the light to the top, and has the laser scan its way downwards until it detects a plant.
- * Once a plant is detected, it's up to the scan function to raise the light to the proper height.
- */
+   This function brings the light to the top, and has the laser scan its way downwards until it detects a plant.
+   Once a plant is detected, it's up to the scan function to raise the light to the proper height.
+*/
 void initialize() {
   digitalWrite(LASER, HIGH);
-  while(digitalRead(V_LIMIT_UP))
+  while (digitalRead(V_LIMIT_UP))
     vstep(UP);
   toLLimit();
 
   int scanDirection = RIGHT;
   int scanLimit = H_LIMIT_RIGHT;
-  
-  while(true) {
+
+  while (true) {
     //If we can't step all the way down, return;
     if (!vstep(DOWN, RESET_DOWN_STEPS)) {
       scan();
@@ -118,11 +149,11 @@ void initialize() {
 
     //Scan
     while (digitalRead(scanLimit)) {
-        hstep(scanDirection);
-        if (!digitalRead(LASER_SENSOR)) {
-          scan();
-          return;
-        }
+      hstep(scanDirection);
+      if (!digitalRead(LASER_SENSOR)) {
+        scan();
+        return;
+      }
     }
 
     //If we reach this point, we didn't break contact, so continue downwards and scan the other direction
@@ -171,30 +202,30 @@ void scan() {
     }
   }
   digitalWrite(LASER, LOW);
-  if(digitalRead(READ))
+  if (HOUR >= 8 && HOUR < 20)
   {
     digitalWrite(GROW_LIGHT, HIGH);
   }
 }
 
 void hstep(int direction) {
-    digitalWrite(H_DIRECTION, direction);
-    digitalWrite(H_ENABLE, LOW);
-    digitalWrite(H_STEP, HIGH);
-    delayMicroseconds(500);
-    digitalWrite(H_STEP, LOW);
-    delayMicroseconds(500);
-    digitalWrite(H_ENABLE, LOW);
+  digitalWrite(H_DIRECTION, direction);
+  digitalWrite(H_ENABLE, LOW);
+  digitalWrite(H_STEP, HIGH);
+  delayMicroseconds(500);
+  digitalWrite(H_STEP, LOW);
+  delayMicroseconds(500);
+  digitalWrite(H_ENABLE, LOW);
 }
 
 void vstep(int direction) {
-    digitalWrite(V_DIRECTION, direction);
-    digitalWrite(V_ENABLE, LOW );
-    digitalWrite(V_STEP, HIGH);
-    delayMicroseconds(500);
-    digitalWrite(V_STEP, LOW);
-    delayMicroseconds(500);
-    digitalWrite(V_ENABLE, HIGH);
+  digitalWrite(V_DIRECTION, direction);
+  digitalWrite(V_ENABLE, LOW );
+  digitalWrite(V_STEP, HIGH);
+  delayMicroseconds(500);
+  digitalWrite(V_STEP, LOW);
+  delayMicroseconds(500);
+  digitalWrite(V_ENABLE, HIGH);
 }
 
 boolean vstep(int direction, int amount) {
@@ -229,41 +260,41 @@ boolean laserCheck() {
 
 
 /*
- * This function keeps the time and switches the light on and off depending on the time as well as 
- * watering based on time
- */
+   This function keeps the time and switches the light on and off depending on the time as well as
+   watering based on time
+*/
 void rtc_get() {
 
-  //Sets previous hour as base for scanning 
-//  if(newHour = 1);
-//  {
-//    prevt = t;
-//    newHour = 0;
-//  }
-//
-//  if(t.hour = prevt.hour + 1)
-//  {
-//    digitalWrite(GROW_LIGHT, LOW);
-//    scan();
-//    rtc_get();
-//    digitalWrite(GROW_LIGHT, HIGH);
-//    newHour = 1;  
-//  }
-//  
-//  //Time to turn on light
-//  if(t.hour == 8 && !digitalRead(GROW_LIGHT))
-//  {
-//    digitalWrite(GROW_LIGHT, HIGH);
-//    moistureRead();
-//  }
-//    
-//  //Turn off light
-//  if(t.hour == 16 && digitalRead(GROW_LIGHT))
-//  {
-//    digitalWrite(GROW_LIGHT, LOW);
-//    moistureRead();
-//  } 
-//  
+  //Sets previous hour as base for scanning
+  //  if(newHour = 1);
+  //  {
+  //    prevt = t;
+  //    newHour = 0;
+  //  }
+  //
+  //  if(t.hour = prevt.hour + 1)
+  //  {
+  //    digitalWrite(GROW_LIGHT, LOW);
+  //    scan();
+  //    rtc_get();
+  //    digitalWrite(GROW_LIGHT, HIGH);
+  //    newHour = 1;
+  //  }
+  //
+  //  //Time to turn on light
+  //  if(t.hour == 8 && !digitalRead(GROW_LIGHT))
+  //  {
+  //    digitalWrite(GROW_LIGHT, HIGH);
+  //    moistureRead();
+  //  }
+  //
+  //  //Turn off light
+  //  if(t.hour == 16 && digitalRead(GROW_LIGHT))
+  //  {
+  //    digitalWrite(GROW_LIGHT, LOW);
+  //    moistureRead();
+  //  }
+  //
 
 }
 
