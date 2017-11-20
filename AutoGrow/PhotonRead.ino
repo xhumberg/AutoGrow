@@ -7,7 +7,7 @@ void setupPhotonRead() {
 
 void loopPhotonRead() {
   delay(1000);
-  //Serial1.println("BOOPY BOOP BOOP");
+ 
   
   // 1 = light on 0 = light off
   if (HOUR >= 8 && HOUR < 20)
@@ -36,7 +36,7 @@ void loopPhotonRead() {
       {
         readBuf[readBufOffset] = 0;
         String buf2string(readBuf);
-        Serial.println(buf2string);
+        //Serial.println(buf2string); // **** UNCOMMENT THIS LINE TO PRINT CURRENT TIME IN SERIAL. ****
         String HOURT(readBuf[0]);
         String HOURO(readBuf[1]);
         String SHOUR = HOURT + HOURO;

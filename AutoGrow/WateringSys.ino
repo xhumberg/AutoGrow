@@ -7,11 +7,11 @@ void loopWateringSys() {
   // put your main code here, to run repeatedly: 
   
  // Serial.print("\n\n");
-  //Serial.println("Starting Soil Monitoring System");
-  //moistureRead();
-  //Serial.println("Finished Soil Monitoring System");
-  //Serial.print("\n\n"); 
-  //delay(10000);
+ // Serial.println("Starting Soil Monitoring System");
+ // moistureRead();
+ // Serial.println("Finished Soil Monitoring System");
+ // Serial.print("\n\n"); 
+ // delay(10000);
 
 }
 
@@ -30,32 +30,32 @@ void moistureRead() {
   sens2 = analogRead(SENSOR2);
   sens3 = analogRead(SENSOR3);
   
-  Serial.println("Reading Soil Sensors");
+  //Serial.println("Reading Soil Sensors");
 
-  Serial.print("Soil Sensor 1: ");
-  Serial.print(sens1); //print the value to serial port
-  Serial.print('\n'); //print the value to serial port
-  Serial.print("Soil Sensor 2: ");
-  Serial.print(sens2); //print the value to serial port
-  Serial.print('\n'); //print the value to serial 
-  Serial.print("Soil Sensor 3: ");
-  Serial.print(sens3); //print the value to serial port
-  Serial.print('\n'); //print the value to serial 
+  //Serial.print("Soil Sensor 1: ");
+  //Serial.print(sens1); //print the value to serial port
+  //Serial.print('\n'); //print the value to serial port
+  //Serial.print("Soil Sensor 2: ");
+  //Serial.print(sens2); //print the value to serial port
+  //Serial.print('\n'); //print the value to serial 
+  //Serial.print("Soil Sensor 3: ");
+  //Serial.print(sens3); //print the value to serial port
+ // Serial.print('\n'); //print the value to serial 
 
 //  Waters each plant if the read in moisture value was deemed dry
-  if(sens1 > 700 && !bucket)
+  if(sens1 > 650 && !bucket)
     water1();
-  if(sens1 > 700 && bucket)
+  if(sens1 > 650 && bucket)
     Serial.println("Plant 1 needs watered but reservoir is empty ");
-  if(sens2 > 700 && !bucket)
+  if(sens2 > 650 && !bucket)
     water2();
-  if(sens2 > 700 && bucket)
+  if(sens2 > 650 && bucket)
     Serial.println("Plant 2 needs watered but reservoir is empty ");
 
-  if(sens3 > 700 && !bucket)
+  if(sens3 > 650 && !bucket)
     water3();
-  if(sens3 > 700 && bucket)
-     Serial.println("Plant 3 needs watered but reservoir is empty ");
+  if(sens3 > 650 && bucket)
+     //Serial.println("Plant 3 needs watered but reservoir is empty ");
   if(bucket)
      Serial.println("WARNING RESERVOIR IS EMPTY, PLEASE FILL WITH WATER");
 
@@ -66,14 +66,14 @@ void moistureRead() {
  */
 void water1() {
   //Turn on watering for specific plant
-  Serial.println("Start Watering Plant 1");
+  //Serial.println("Start Watering Plant 1");
   digitalWrite(SOLENOID0, LOW);
   digitalWrite(SOLENOID1, LOW);
   digitalWrite(SOLENOID2, LOW);
   digitalWrite(PUMP_EN, HIGH);
   delay(1000);
   digitalWrite(PUMP_A, HIGH);
-  delay(10000);
+  delay(20000);
 
   //Turn off watering for specific plant
   digitalWrite(PUMP_A, LOW);
@@ -82,7 +82,7 @@ void water1() {
   digitalWrite(SOLENOID1, LOW);
   digitalWrite(SOLENOID2, LOW);
   digitalWrite(PUMP_EN, LOW);
-  Serial.println("Finished Watering Plant 1");
+  //Serial.println("Finished Watering Plant 1");
   Serial1.println("1");
   
 }
@@ -92,14 +92,14 @@ void water1() {
  */
 void water2() {
   //Turn on watering for specific plant
-  Serial.println("Start Watering Plant 2");
+  //Serial.println("Start Watering Plant 2");
   digitalWrite(SOLENOID0, HIGH);
   digitalWrite(SOLENOID1, LOW);
   digitalWrite(SOLENOID2, LOW);
   digitalWrite(PUMP_EN, HIGH);
   delay(1000);
   digitalWrite(PUMP_A, HIGH);
-  delay(10000);
+  delay(20000);
 
   //Turn off watering for specific plant
   digitalWrite(PUMP_A, LOW);
@@ -108,7 +108,7 @@ void water2() {
   digitalWrite(SOLENOID1, LOW);
   digitalWrite(SOLENOID2, LOW);
   digitalWrite(PUMP_EN, LOW);
-  Serial.println("Finished Watering Plant 2");
+  //Serial.println("Finished Watering Plant 2");
   Serial1.println("1");
 
 }
@@ -118,14 +118,14 @@ void water2() {
  */
 void water3() {
   //Turn on watering for specific plant
-  Serial.println("Start Watering Plant 3");
+  //Serial.println("Start Watering Plant 3");
   digitalWrite(SOLENOID0, LOW);
   digitalWrite(SOLENOID1, HIGH);
   digitalWrite(SOLENOID2, LOW);
   digitalWrite(PUMP_EN, HIGH);
   delay(1000);
   digitalWrite(PUMP_A, HIGH);
-  delay(10000);
+  delay(20000);
 
   //Turn off watering for specific plant
   digitalWrite(PUMP_A, LOW);
@@ -134,7 +134,7 @@ void water3() {
   digitalWrite(SOLENOID1, LOW);
   digitalWrite(SOLENOID2, LOW);
   digitalWrite(PUMP_EN, LOW);
-  Serial.println("Finished Watering Plant 3");
+  //Serial.println("Finished Watering Plant 3");
   Serial1.println("1");
   
 }
