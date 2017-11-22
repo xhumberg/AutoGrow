@@ -38,9 +38,13 @@
 
 //Constants (so there aren't any magic numbers)
 #define H_IDLE_OFFSET 100
-#define RESET_DOWN_STEPS 3000
+#define RESET_DOWN_STEPS 500
 
 int TIME, HOUR, MIN;
+
+int initialCase = 1;
+int scanCount = 0;
+int called = 1;
 
 //For UART communcation from Photon
 const size_t READ_BUF_SIZE = 64;
@@ -84,7 +88,17 @@ void loop() {
   if ( newh == false && newHOUR != prevh)
   {
     digitalWrite(GROW_LIGHT, LOW);
+
+    if(scanCount < 6){
     scan();
+    scanCount++;
+    }
+    if(scanCount >=6){
+      called = 0;
+      initialCase = 1;
+      initialize();
+    }
+    
     moistureRead();
     if (HOUR >= 8 && HOUR < 20)
     {
@@ -133,14 +147,18 @@ void initializePins() {
 */
 void initialize() {
   digitalWrite(LASER, HIGH);
-  while (digitalRead(V_LIMIT_UP))
-    vstep(UP);
+  //while (digitalRead(V_LIMIT_UP))
+  //  vstep(UP);
   toLLimit();
 
   int scanDirection = RIGHT;
   int scanLimit = H_LIMIT_RIGHT;
 
-  while (true) {
+  if(called){
+    scan();
+  }
+
+  while (initialCase) {
     //If we can't step all the way down, return;
     if (!vstep(DOWN, RESET_DOWN_STEPS)) {
       scan();
@@ -165,6 +183,9 @@ void initialize() {
       scanLimit = H_LIMIT_RIGHT;
     }
   }
+
+
+  
 }
 
 void scan() {
@@ -206,6 +227,7 @@ void scan() {
   {
     digitalWrite(GROW_LIGHT, HIGH);
   }
+  
 }
 
 void hstep(int direction) {
@@ -229,6 +251,9 @@ void vstep(int direction) {
 }
 
 boolean vstep(int direction, int amount) {
+  initialCase = 0;
+  
+  
   for (int i = 0; i < amount; i++) {
     if (direction == UP)
       if (!digitalRead(V_LIMIT_UP))
@@ -238,6 +263,11 @@ boolean vstep(int direction, int amount) {
         return false;
     vstep(direction);
   }
+
+  if(direction == UP){
+    scanCount = 0;
+  }
+  
   return true;
 }
 
@@ -257,44 +287,17 @@ boolean laserCheck() {
   return digitalRead(LASER_SENSOR);
 }
 
-
-
-/*
-   This function keeps the time and switches the light on and off depending on the time as well as
-   watering based on time
-*/
-void rtc_get() {
-
-  //Sets previous hour as base for scanning
-  //  if(newHour = 1);
-  //  {
-  //    prevt = t;
-  //    newHour = 0;
-  //  }
-  //
-  //  if(t.hour = prevt.hour + 1)
-  //  {
-  //    digitalWrite(GROW_LIGHT, LOW);
-  //    scan();
-  //    rtc_get();
-  //    digitalWrite(GROW_LIGHT, HIGH);
-  //    newHour = 1;
-  //  }
-  //
-  //  //Time to turn on light
-  //  if(t.hour == 8 && !digitalRead(GROW_LIGHT))
-  //  {
-  //    digitalWrite(GROW_LIGHT, HIGH);
-  //    moistureRead();
-  //  }
-  //
-  //  //Turn off light
-  //  if(t.hour == 16 && digitalRead(GROW_LIGHT))
-  //  {
-  //    digitalWrite(GROW_LIGHT, LOW);
-  //    moistureRead();
-  //  }
-  //
-
+void test(){
+  for(int testI = 0; testI < 7; testI++ ){
+    Serial.print("Scan Test: ");
+    Serial.print(testI);
+    Serial.print("\n");
+    scan();
+    scanCount++;
+    Serial.print("Scan Count: ");
+    Serial.print(scanCount);
+    Serial.print("\n");
+  }
 }
+
 
