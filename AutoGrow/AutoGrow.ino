@@ -64,7 +64,7 @@ void setup() {
   initializePins();
   digitalWrite(H_ENABLE, HIGH);
   initialize();
-  if (HOUR >= 8 && HOUR < 20)
+  if (HOUR >= 8 && HOUR < 20 && digitalRead(V_LIMIT_UP))
   {
     digitalWrite(GROW_LIGHT, HIGH);
   }
@@ -73,7 +73,7 @@ void setup() {
 
 void loop() {
 
-  if (HOUR >= 8 && HOUR < 20)
+  if (HOUR >= 8 && HOUR < 20 && digitalRead(V_LIMIT_UP))
   {
     digitalWrite(GROW_LIGHT, HIGH);
   }
@@ -100,7 +100,7 @@ void loop() {
     }
     
     moistureRead();
-    if (HOUR >= 8 && HOUR < 20)
+    if (HOUR >= 8 && HOUR < 20 && digitalRead(V_LIMIT_UP))
     {
       digitalWrite(GROW_LIGHT, HIGH);
     }
@@ -223,7 +223,7 @@ void scan() {
     }
   }
   digitalWrite(LASER, LOW);
-  if (HOUR >= 8 && HOUR < 20)
+  if (HOUR >= 8 && HOUR < 20 && digitalRead(V_LIMIT_UP))
   {
     digitalWrite(GROW_LIGHT, HIGH);
   }

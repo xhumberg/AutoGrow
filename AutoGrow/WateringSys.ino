@@ -43,22 +43,27 @@ void moistureRead() {
  // Serial.print('\n'); //print the value to serial 
 
 //  Waters each plant if the read in moisture value was deemed dry
-  if(sens1 > 650 && !bucket)
+  if(sens1 > 650 && !bucket){
     water1();
-  if(sens1 > 650 && bucket)
-    Serial.println("Plant 1 needs watered but reservoir is empty ");
-  if(sens2 > 650 && !bucket)
+  }
+  if(sens1 > 650 && bucket){
+    Serial1.println("WP1"); //Plant 1 needs watered but reservoir is empty
+  }
+  if(sens2 > 650 && !bucket){
     water2();
-  if(sens2 > 650 && bucket)
-    Serial.println("Plant 2 needs watered but reservoir is empty ");
-
-  if(sens3 > 650 && !bucket)
+  }
+  if(sens2 > 650 && bucket){
+    Serial1.println("WP2"); //Plant 2 needs watered but reservoir is empty
+  }
+  if(sens3 > 650 && !bucket){
     water3();
-  if(sens3 > 650 && bucket)
-     //Serial.println("Plant 3 needs watered but reservoir is empty ");
-  if(bucket)
-     Serial.println("WARNING RESERVOIR IS EMPTY, PLEASE FILL WITH WATER");
-
+  }
+  if(sens3 > 650 && bucket){
+     Serial1.println("WP3"); //Plant 3 needs watered but reservoir is empty
+  }   
+  if(bucket){
+   Serial1.println("WR"); //WARNING RESERVOIR IS EMPTY, PLEASE FILL WITH WATER
+  }
 }
 
 /*
@@ -83,7 +88,7 @@ void water1() {
   digitalWrite(SOLENOID2, LOW);
   digitalWrite(PUMP_EN, LOW);
   //Serial.println("Finished Watering Plant 1");
-  Serial1.println("1");
+  Serial1.println("P1");
   
 }
 
@@ -109,7 +114,7 @@ void water2() {
   digitalWrite(SOLENOID2, LOW);
   digitalWrite(PUMP_EN, LOW);
   //Serial.println("Finished Watering Plant 2");
-  Serial1.println("1");
+  Serial1.println("P2");
 
 }
 
@@ -135,6 +140,6 @@ void water3() {
   digitalWrite(SOLENOID2, LOW);
   digitalWrite(PUMP_EN, LOW);
   //Serial.println("Finished Watering Plant 3");
-  Serial1.println("1");
+  Serial1.println("P3");
   
 }

@@ -10,7 +10,7 @@ void loopPhotonRead() {
  
   
   // 1 = light on 0 = light off
-  if (HOUR >= 8 && HOUR < 20)
+  if (HOUR >= 8 && HOUR < 20 && digitalRead(V_LIMIT_UP))
   {
     digitalWrite(GROW_LIGHT, HIGH);
     //  Serial.println("LIGHT ON"); //print the value to serial port
