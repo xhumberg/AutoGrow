@@ -72,7 +72,6 @@ void setup() {
 }
 
 void loop() {
-
   if (HOUR >= 8 && HOUR < 20 && digitalRead(V_LIMIT_UP))
   {
     digitalWrite(GROW_LIGHT, HIGH);
