@@ -21,6 +21,7 @@ void loopPhotonRead() {
     //Serial.println("LIGHT OFF"); //print the value to serial port
   }
 
+  //For reading in the time coming from Photon
   while (Serial1.available())
   {
     if (readBufOffset < READ_BUF_SIZE)

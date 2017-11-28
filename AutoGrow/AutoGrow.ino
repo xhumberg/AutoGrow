@@ -72,18 +72,22 @@ void setup() {
 }
 
 void loop() {
+
+  //Only turn the light on between 8 AM and 8 PM
   if (HOUR >= 8 && HOUR < 20 && digitalRead(V_LIMIT_UP))
   {
     digitalWrite(GROW_LIGHT, HIGH);
   }
-    
+
+  //Sets a new hour for scanning
   int newHOUR = HOUR;
   if (newh)
   {
     prevh = newHOUR;
     newh = false;
   }
-  
+
+  //The following lines make the AutoGrow scan once every hour and check the moisture levels
   if ( newh == false && newHOUR != prevh)
   {
     digitalWrite(GROW_LIGHT, LOW);
@@ -92,6 +96,8 @@ void loop() {
     scan();
     scanCount++;
     }
+
+    //Each scan has not raised the light, so lower light for new plant height
     if(scanCount >=6){
       called = 0;
       initialCase = 1;
