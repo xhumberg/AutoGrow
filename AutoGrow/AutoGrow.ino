@@ -204,23 +204,26 @@ void scan() {
   int scanLimit = H_LIMIT_RIGHT;
   boolean interrupted = false;
 
-  while (digitalRead(scanLimit)) {
+  while (true) {
     interrupted = false;
     while (digitalRead(scanLimit)) {
       hstep(scanDirection);
       if (!digitalRead(LASER_SENSOR)) {
         interrupted = true;
         if (!vstep(UP, 150)) {
-          return;
+          resetH();
           digitalWrite(LASER, LOW);
+          return;
         }
       }
     }
+    
     if (!interrupted) {
       resetH();
       digitalWrite(LASER, LOW);
       return;
     }
+    
     //If we reach this point, we were interrupted, so we should scan the other way
     if (scanDirection == RIGHT) {
       scanDirection = LEFT;
