@@ -64,11 +64,12 @@ void setup() {
   initializePins();
   digitalWrite(H_ENABLE, HIGH);
   initialize();
+
+  //Check the hour for whether or not to turn on the light
   if (HOUR >= 8 && HOUR < 20 && digitalRead(V_LIMIT_UP))
   {
     digitalWrite(GROW_LIGHT, HIGH);
   }
-  //digitalWrite(GROW_LIGHT, HIGH);
 }
 
 void loop() {
@@ -87,17 +88,18 @@ void loop() {
     newh = false;
   }
 
-  //The following lines make the AutoGrow scan once every hour and check the moisture levels
+  //Scan once every hour and check the moisture levels
   if ( newh == false && newHOUR != prevh)
   {
     digitalWrite(GROW_LIGHT, LOW);
 
+    // Complete 6 normal scans
     if(scanCount < 6){
     scan();
     scanCount++;
     }
 
-    //Each scan has not raised the light, so lower light for new plant height
+    //6 scans have not raised the light, so lower the light to make sure we didn't end up with a fluke incident.
     if(scanCount >=6){
       called = 0;
       initialCase = 1;
@@ -105,6 +107,8 @@ void loop() {
     }
     
     moistureRead();
+
+    //Turn the light back on?
     if (HOUR >= 8 && HOUR < 20 && digitalRead(V_LIMIT_UP))
     {
       digitalWrite(GROW_LIGHT, HIGH);
@@ -112,7 +116,6 @@ void loop() {
     prevh = newHOUR;
     newh = true;
   }
-  //Serial.println(prevh);
 }
 
 
@@ -152,13 +155,13 @@ void initializePins() {
 */
 void initialize() {
   digitalWrite(LASER, HIGH);
-  //while (digitalRead(V_LIMIT_UP))
-  //  vstep(UP);
+  
   toLLimit();
 
   int scanDirection = RIGHT;
   int scanLimit = H_LIMIT_RIGHT;
 
+  //Do this only when FIRST initializing. Scan immediately, go up if needed.
   if(called){
     scan();
   }
@@ -201,7 +204,7 @@ void scan() {
   int scanLimit = H_LIMIT_RIGHT;
   boolean interrupted = false;
 
-  while (true) {
+  while (digitalRead(scanLimit)) {
     interrupted = false;
     while (digitalRead(scanLimit)) {
       hstep(scanDirection);
