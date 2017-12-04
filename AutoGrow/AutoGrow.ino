@@ -155,6 +155,8 @@ void initializePins() {
 */
 void initialize() {
   digitalWrite(LASER, HIGH);
+
+  notTop();
   
   toLLimit();
 
@@ -311,4 +313,8 @@ void test(){
   }
 }
 
+void notTop() {
+  if (!digitalRead(V_LIMIT_UP))
+    vstep(DOWN, 1000);
+}
 
