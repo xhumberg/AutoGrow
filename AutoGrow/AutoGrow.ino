@@ -17,6 +17,12 @@
 #define LASER_SENSOR P3_0
 #define GROW_LIGHT P3_6
 #define READ P6_0
+#define UP_BUTTON 0
+#define DOWN_BUTTON 0
+#define INIT_BUTTON 0
+#define WATER_BUTTON 0
+#define WATER_SWITCH_ONE 0
+#define WATER_SWITCH_ZERO 0
 
 
 //For watering system
@@ -116,6 +122,8 @@ void loop() {
     prevh = newHOUR;
     newh = true;
   }
+
+  detectButtons();
 }
 
 
@@ -156,19 +164,20 @@ void initializePins() {
 void initialize() {
   digitalWrite(LASER, HIGH);
 
+//Ensure Initialize still does something when we reach the top
   notTop();
-  
+
   toLLimit();
 
   int scanDirection = RIGHT;
   int scanLimit = H_LIMIT_RIGHT;
 
-  //Do this only when FIRST initializing. Scan immediately, go up if needed.
-  if(called){
-    scan();
-  }
+//  //Do this only when FIRST initializing. Scan immediately, go up if needed.
+//  if(called){
+//    scan();
+//  }
 
-  while (initialCase) {
+  while (true) {
     //If we can't step all the way down, return;
     if (!vstep(DOWN, RESET_DOWN_STEPS)) {
       scan();
@@ -193,14 +202,12 @@ void initialize() {
       scanLimit = H_LIMIT_RIGHT;
     }
   }
-
-
-  
 }
 
 void scan() {
   digitalWrite(LASER, HIGH);
   toLLimit();
+  delay(1000); 
 
   int scanDirection = RIGHT;
   int scanLimit = H_LIMIT_RIGHT;
@@ -236,10 +243,7 @@ void scan() {
     }
   }
   digitalWrite(LASER, LOW);
-  if (HOUR >= 8 && HOUR < 20 && digitalRead(V_LIMIT_UP))
-  {
-    digitalWrite(GROW_LIGHT, HIGH);
-  }
+
   
 }
 
@@ -316,5 +320,31 @@ void test(){
 void notTop() {
   if (!digitalRead(V_LIMIT_UP))
     vstep(DOWN, 1000);
+}
+
+void detectButtons() {
+  if (digitalRead(UP_BUTTON))
+    vstep(UP, 100);
+  else if (digitalRead(DOWN_BUTTON))
+    vstep(DOWN, 100);
+  if (digitalRead(INIT_BUTTON))
+    initialize();
+  if (digitalRead(WATER_BUTTON)) {
+    int thisOne = digitalRead(WATER_SWITCH_ONE) + 2*digitalRead(WATER_SWITCH_ZERO);
+    switch (thisOne) {
+      case 0:
+        water1();
+        break;
+      case 1:
+        water2();
+        break;
+      case 2:
+        water3();
+        break;
+      case 3:
+        break;
+    }
+  }
+  delay(100);
 }
 
