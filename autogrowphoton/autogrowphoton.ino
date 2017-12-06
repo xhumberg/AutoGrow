@@ -3,15 +3,20 @@ const size_t READ_BUF_SIZE = 64;
 char readBuf[READ_BUF_SIZE];
 size_t readBufOffset = 0;
 
-int water = 0;
+//Keep track of events
+int water1, water2, water3 = 0;
 
 //Declaration of function
 void sendTime();
 void process(int);
 
 void setup() {
-
-  Particle.variable("water", &water, INT);
+    
+  //Variable monitoring from cloud
+  Particle.variable("water", &water1, INT);
+  Particle.variable("water", &water2, INT);
+  Particle.variable("water", &water3, INT);
+  
   
   //Begin UART communication.  Serial1 for MSP432
   Serial1.begin(9600);
@@ -29,6 +34,14 @@ void loop() {
   
   //Send time to the MSP432
   sendTime();
+  
+  //Weekly update given on Saturday 11pm
+  if(Time.weekday() == 4 && Time.hour() == 23)
+  {
+      //Create a string to be sent to cloud
+      String update = "Plant 1 watered: " + String(water1) + "Plant 2 watered: " + String(water2) + "Plant 3 watered: " + String(water3);
+      Particle.publish("newsletter", update);
+  }
   
   //Receive from MSP432 serial messages on RX line
   while(Serial1.available())
@@ -48,11 +61,6 @@ void loop() {
               readBuf[readBufOffset] = 0;
               String buf2string(readBuf);
               int val = atoi(buf2string);
-            //   Serial.print("Input val from buffer: ");
-            //   Serial.print(val);
-            //   Serial.println();
-              //int val = atoi(string2buf);
-              //Serial.println(val);
               process(val);
               
               //Reset buffer position
@@ -72,29 +80,20 @@ void loop() {
  */
 void process(int line)
 {
-    // Serial.print("Entering process with given line: ");
-    // Serial.print(line);
-    // Serial.println();
     //Message received was plant watered
     if(line == 11) //Plant 1
     {
-        //Serial.println(line);
-        water++;
-        //Serial.println("Plant watererd");
+        water1++;
         Particle.publish("plantWatered1");
     }
     if(line == 12) //Plant 2
     {
-        //Serial.println(line);
-        water++;
-        //Serial.println("Plant watererd");
+        water2++;
         Particle.publish("plantWatered2");
     }
     if(line == 13) //Plant 3
     {
-        //Serial.println(line);
-        water++;
-        //Serial.println("Plant watererd");
+        water3++;
         Particle.publish("plantWatered3");
     }
     
