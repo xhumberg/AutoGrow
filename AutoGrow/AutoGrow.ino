@@ -366,6 +366,7 @@ void detectButtons() {
         water3();
         break;
       case 3:
+        water4();
         break;
     }
   }
