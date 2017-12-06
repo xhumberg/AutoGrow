@@ -4,6 +4,8 @@
 #define P4_3 6
 #define P1_5 7
 #define P4_6 8
+#define P6_5 9
+#define P6_4 10
 #define P6_1 23
 #define P4_0 24
 #define P4_2 25

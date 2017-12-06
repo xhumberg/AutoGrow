@@ -17,12 +17,12 @@
 #define LASER_SENSOR P3_0
 #define GROW_LIGHT P3_6
 #define READ P6_0
-#define UP_BUTTON 0
-#define DOWN_BUTTON 0
-#define INIT_BUTTON 0
-#define WATER_BUTTON 0
-#define WATER_SWITCH_ONE 0
-#define WATER_SWITCH_ZERO 0
+#define UP_BUTTON P4_6
+#define DOWN_BUTTON P6_4
+#define INIT_BUTTON P6_5
+#define WATER_BUTTON P4_3
+#define WATER_SWITCH_ONE P5_0
+#define WATER_SWITCH_ZERO P5_2
 
 
 //For watering system
@@ -51,6 +51,7 @@ int TIME, HOUR, MIN;
 int initialCase = 1;
 int scanCount = 0;
 int called = 1;
+int scanning = 0;
 
 //For UART communcation from Photon
 const size_t READ_BUF_SIZE = 64;
@@ -81,6 +82,7 @@ void setup() {
 void loop() {
 
   //Only turn the light on between 8 AM and 8 PM
+  while (scanning == 1) {delay(100);} //Lock while scanning
   if (HOUR >= 8 && HOUR < 20 && digitalRead(V_LIMIT_UP))
   {
     digitalWrite(GROW_LIGHT, HIGH);
@@ -114,6 +116,8 @@ void loop() {
     
     moistureRead();
 
+    while (scanning == 1) {delay(100);} //Lock while scanning
+    
     //Turn the light back on?
     if (HOUR >= 8 && HOUR < 20 && digitalRead(V_LIMIT_UP))
     {
@@ -153,6 +157,12 @@ void initializePins() {
   pinMode(PUMP_A, OUTPUT);
   pinMode(WATERBUCKET, INPUT);
   pinMode(READ, INPUT);
+  pinMode(UP_BUTTON, INPUT_PULLUP);
+  pinMode(DOWN_BUTTON, INPUT_PULLUP);
+  pinMode(INIT_BUTTON, INPUT_PULLUP);
+  pinMode(WATER_BUTTON, INPUT_PULLUP);
+  pinMode(WATER_SWITCH_ONE, INPUT_PULLUP);
+  pinMode(WATER_SWITCH_ZERO, INPUT_PULLUP);
 
   // pinMode(BLUE_LED, OUTPUT);
 }
@@ -205,7 +215,9 @@ void initialize() {
 }
 
 void scan() {
+  scanning = 1;
   digitalWrite(LASER, HIGH);
+  digitalWrite(GROW_LIGHT, LOW);
   toLLimit();
   delay(1000); 
 
@@ -222,6 +234,7 @@ void scan() {
         if (!vstep(UP, 150)) {
           resetH();
           digitalWrite(LASER, LOW);
+          scanning = 0;
           return;
         }
       }
@@ -230,6 +243,7 @@ void scan() {
     if (!interrupted) {
       resetH();
       digitalWrite(LASER, LOW);
+      scanning = 0;
       return;
     }
     
@@ -323,14 +337,24 @@ void notTop() {
 }
 
 void detectButtons() {
-  if (digitalRead(UP_BUTTON))
-    vstep(UP, 100);
-  else if (digitalRead(DOWN_BUTTON))
-    vstep(DOWN, 100);
-  if (digitalRead(INIT_BUTTON))
+  if (!digitalRead(UP_BUTTON)) {
+    digitalWrite(GROW_LIGHT, LOW);
+    while (!digitalRead(UP_BUTTON))
+      vstep(UP, 100);
+    scan();
+  }
+  else if (!digitalRead(DOWN_BUTTON)) {
+    digitalWrite(GROW_LIGHT, LOW);
+    while (!digitalRead(DOWN_BUTTON))
+      vstep(DOWN, 100);
+    scan();
+  }
+  if (!digitalRead(INIT_BUTTON)) {
+    digitalWrite(GROW_LIGHT, LOW);
     initialize();
-  if (digitalRead(WATER_BUTTON)) {
-    int thisOne = digitalRead(WATER_SWITCH_ONE) + 2*digitalRead(WATER_SWITCH_ZERO);
+  }
+  if (!digitalRead(WATER_BUTTON)) {
+    int thisOne = (!digitalRead(WATER_SWITCH_ZERO)) + 2*(!digitalRead(WATER_SWITCH_ONE));
     switch (thisOne) {
       case 0:
         water1();
