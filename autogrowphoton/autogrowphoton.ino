@@ -6,6 +6,9 @@ size_t readBufOffset = 0;
 //Keep track of events
 int water1, water2, water3 = 0;
 
+//for email
+int sent;
+
 //Declaration of function
 void sendTime();
 void process(int);
@@ -13,11 +16,12 @@ void process(int);
 void setup() {
     
   //Variable monitoring from cloud
-  Particle.variable("water", &water1, INT);
-  Particle.variable("water", &water2, INT);
-  Particle.variable("water", &water3, INT);
+  Particle.variable("water1", &water1, INT);
+  Particle.variable("water2", &water2, INT);
+  Particle.variable("water3", &water3, INT);
   
-  
+  sent = 0;
+  Particle.variable("sent", &sent, INT);
   //Begin UART communication.  Serial1 for MSP432
   Serial1.begin(9600);
   //Serial.begin(9600);
@@ -35,12 +39,19 @@ void loop() {
   //Send time to the MSP432
   sendTime();
   
-  //Weekly update given on Saturday 11pm
-  if(Time.weekday() == 4 && Time.hour() == 23)
+  //For email
+  if(sent == 1 && Time.weekday() != 5)
+  {
+      sent = 0;
+  }
+  
+  //Weekly update given on Saturday 11:00pm
+  if(Time.weekday() == 5 && Time.hour() == 12 && sent == 0)
   {
       //Create a string to be sent to cloud
-      String update = "Plant 1 watered: " + String(water1) + "Plant 2 watered: " + String(water2) + "Plant 3 watered: " + String(water3);
+      String update = "Plant 1 watered: " + String(water1) + " Plant 2 watered: " + String(water2) + " Plant 3 watered: " + String(water3);
       Particle.publish("newsletter", update);
+      sent = 1;
   }
   
   //Receive from MSP432 serial messages on RX line
