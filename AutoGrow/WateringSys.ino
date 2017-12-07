@@ -143,3 +143,30 @@ void water3() {
   Serial1.println("13");
   
 }
+
+/*
+ * Handles watering for plant 3
+ */
+void water4() {
+  //Turn on watering for specific plant
+  //Serial.println("Start Watering Plant 3");
+  digitalWrite(SOLENOID0, HIGH);
+  digitalWrite(SOLENOID1, HIGH);
+  digitalWrite(SOLENOID2, LOW);
+  digitalWrite(PUMP_EN, HIGH);
+  delay(1000);
+  digitalWrite(PUMP_A, HIGH);
+  delay(20000);
+
+  //Turn off watering for specific plant
+  digitalWrite(PUMP_A, LOW);
+  delay(1000);
+  digitalWrite(SOLENOID0, LOW);
+  digitalWrite(SOLENOID1, LOW);
+  digitalWrite(SOLENOID2, LOW);
+  digitalWrite(PUMP_EN, LOW);
+  //Serial.println("Finished Watering Plant 3");
+  Serial1.println("14");
+  
+}
+

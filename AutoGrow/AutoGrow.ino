@@ -17,6 +17,12 @@
 #define LASER_SENSOR P3_0
 #define GROW_LIGHT P3_6
 #define READ P6_0
+#define UP_BUTTON P4_6
+#define DOWN_BUTTON P6_4
+#define INIT_BUTTON P6_5
+#define WATER_BUTTON P4_3
+#define WATER_SWITCH_ONE P5_0
+#define WATER_SWITCH_ZERO P5_2
 
 
 //For watering system
@@ -45,6 +51,7 @@ int TIME, HOUR, MIN;
 int initialCase = 1;
 int scanCount = 0;
 int called = 1;
+int scanning = 0;
 
 //For UART communcation from Photon
 const size_t READ_BUF_SIZE = 64;
@@ -75,6 +82,7 @@ void setup() {
 void loop() {
 
   //Only turn the light on between 8 AM and 8 PM
+  while (scanning == 1) {delay(100);} //Lock while scanning
   if (HOUR >= 8 && HOUR < 20 && digitalRead(V_LIMIT_UP))
   {
     digitalWrite(GROW_LIGHT, HIGH);
@@ -108,6 +116,8 @@ void loop() {
     
     moistureRead();
 
+    while (scanning == 1) {delay(100);} //Lock while scanning
+    
     //Turn the light back on?
     if (HOUR >= 8 && HOUR < 20 && digitalRead(V_LIMIT_UP))
     {
@@ -116,6 +126,8 @@ void loop() {
     prevh = newHOUR;
     newh = true;
   }
+
+  detectButtons();
 }
 
 
@@ -145,6 +157,12 @@ void initializePins() {
   pinMode(PUMP_A, OUTPUT);
   pinMode(WATERBUCKET, INPUT);
   pinMode(READ, INPUT);
+  pinMode(UP_BUTTON, INPUT_PULLUP);
+  pinMode(DOWN_BUTTON, INPUT_PULLUP);
+  pinMode(INIT_BUTTON, INPUT_PULLUP);
+  pinMode(WATER_BUTTON, INPUT_PULLUP);
+  pinMode(WATER_SWITCH_ONE, INPUT_PULLUP);
+  pinMode(WATER_SWITCH_ZERO, INPUT_PULLUP);
 
   // pinMode(BLUE_LED, OUTPUT);
 }
@@ -155,18 +173,21 @@ void initializePins() {
 */
 void initialize() {
   digitalWrite(LASER, HIGH);
-  
+
+//Ensure Initialize still does something when we reach the top
+  notTop();
+
   toLLimit();
 
   int scanDirection = RIGHT;
   int scanLimit = H_LIMIT_RIGHT;
 
-  //Do this only when FIRST initializing. Scan immediately, go up if needed.
-  if(called){
-    scan();
-  }
+//  //Do this only when FIRST initializing. Scan immediately, go up if needed.
+//  if(called){
+//    scan();
+//  }
 
-  while (initialCase) {
+  while (true) {
     //If we can't step all the way down, return;
     if (!vstep(DOWN, RESET_DOWN_STEPS)) {
       scan();
@@ -191,14 +212,14 @@ void initialize() {
       scanLimit = H_LIMIT_RIGHT;
     }
   }
-
-
-  
 }
 
 void scan() {
+  scanning = 1;
   digitalWrite(LASER, HIGH);
+  digitalWrite(GROW_LIGHT, LOW);
   toLLimit();
+  delay(1000); 
 
   int scanDirection = RIGHT;
   int scanLimit = H_LIMIT_RIGHT;
@@ -213,6 +234,7 @@ void scan() {
         if (!vstep(UP, 150)) {
           resetH();
           digitalWrite(LASER, LOW);
+          scanning = 0;
           return;
         }
       }
@@ -221,6 +243,7 @@ void scan() {
     if (!interrupted) {
       resetH();
       digitalWrite(LASER, LOW);
+      scanning = 0;
       return;
     }
     
@@ -234,10 +257,7 @@ void scan() {
     }
   }
   digitalWrite(LASER, LOW);
-  if (HOUR >= 8 && HOUR < 20 && digitalRead(V_LIMIT_UP))
-  {
-    digitalWrite(GROW_LIGHT, HIGH);
-  }
+
   
 }
 
@@ -311,4 +331,45 @@ void test(){
   }
 }
 
+void notTop() {
+  if (!digitalRead(V_LIMIT_UP))
+    vstep(DOWN, 1000);
+}
+
+void detectButtons() {
+  if (!digitalRead(UP_BUTTON)) {
+    digitalWrite(GROW_LIGHT, LOW);
+    while (!digitalRead(UP_BUTTON))
+      vstep(UP, 100);
+    scan();
+  }
+  else if (!digitalRead(DOWN_BUTTON)) {
+    digitalWrite(GROW_LIGHT, LOW);
+    while (!digitalRead(DOWN_BUTTON))
+      vstep(DOWN, 100);
+    scan();
+  }
+  if (!digitalRead(INIT_BUTTON)) {
+    digitalWrite(GROW_LIGHT, LOW);
+    initialize();
+  }
+  if (!digitalRead(WATER_BUTTON)) {
+    int thisOne = (!digitalRead(WATER_SWITCH_ZERO)) + 2*(!digitalRead(WATER_SWITCH_ONE));
+    switch (thisOne) {
+      case 0:
+        water1();
+        break;
+      case 1:
+        water2();
+        break;
+      case 2:
+        water3();
+        break;
+      case 3:
+        water4();
+        break;
+    }
+  }
+  delay(100);
+}
 
